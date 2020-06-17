@@ -3,7 +3,7 @@ import requests
 import telegram
 import time
 from dotenv import load_dotenv
-from boto.s3.connection import S3Connection
+
 
 load_dotenv()
 
@@ -37,11 +37,12 @@ def send_message(message):
     proxy = telegram.utils.request.Request(
         proxy_url='socks5://75.119.217.119:25727')
     bot = telegram.Bot(token=TELEGRAM_TOKEN, request=proxy)
-    return bot.send_message(chat_id=CHAT_ID, text=message)
+    reuslt = bot.send_message(chat_id=CHAT_ID, text=message)
+    return reuslt
 
 
 def main():
-    current_timestamp = 0
+    current_timestamp = int(time.time())
 
     while True:
         try:
@@ -51,12 +52,13 @@ def main():
                     new_homework.get('homeworks')[0]))
             current_timestamp = new_homework.get(
                 'current_date')
-            time.sleep(1200)
+            time.sleep(600)
 
         except Exception as e:
             print(f'Бот упал с ошибкой: {e}')
-            time.sleep(5)
+            time.sleep(15)
             continue
 
 
-main()
+if __name__ == '__main__':
+    main()
