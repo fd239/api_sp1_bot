@@ -76,6 +76,7 @@ def get_homework_statuses(current_timestamp):
 
 
 def send_message(message):
+
     try:
         reuslt = BOT.send_message(chat_id=CHAT_ID, text=message)
     except telegram.error.TelegramError as telegram_error:
@@ -86,6 +87,7 @@ def send_message(message):
 
 
 def main():
+
     current_timestamp = int(time.time())
 
     while True:
