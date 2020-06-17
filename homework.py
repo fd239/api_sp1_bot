@@ -8,9 +8,9 @@ from boto.s3.connection import S3Connection
 load_dotenv()
 
 
-PRACTICUM_TOKEN = S3Connection(os.environ['PRACTICUM_TOKEN'])
-TELEGRAM_TOKEN = S3Connection(os.environ['TELEGRAM_TOKEN'])
-CHAT_ID = S3Connection(os.environ['TELEGRAM_CHAT_ID'])
+PRACTICUM_TOKEN = os.environ.get('PRACTICUM_TOKEN')
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
+CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 
 
 def parse_homework_status(homework):
