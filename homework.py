@@ -41,7 +41,7 @@ def send_message(message):
 
 
 def main():
-    current_timestamp = int(time.time())
+    current_timestamp = 0
 
     while True:
         try:
