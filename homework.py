@@ -7,42 +7,86 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+HOMEWORK_STATUSES = {
+    'rejected': False,
+    'approved': True
+}
 
-PRACTICUM_TOKEN = os.environ.get('PRACTICUM_TOKEN')
-TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
-CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
+ERROR_MSG = 'Неверный ответ сервера'
+
+API_URL = 'https://praktikum.yandex.ru/api/user_api'
+
+PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+TELEGRAM_PROXY = os.getenv('TELEGRAM_PROXY')
+
+PROXY = telegram.utils.request.Request(
+    proxy_url=TELEGRAM_PROXY)
+
+BOT = telegram.Bot(token=TELEGRAM_TOKEN, request=PROXY)
 
 
 def parse_homework_status(homework):
-    homework_name = homework['homework_name']
-    if homework['status'] == 'rejected':
+
+    homework_name = homework.get('homework_name')
+
+    if homework_name == None:
+        return ERROR_MSG
+
+    homework_status_response = homework.get('status')
+
+    if homework_status_response == None:
+        return ERROR_MSG
+
+    homework_status = HOMEWORK_STATUSES[homework_status_response]
+
+    if homework_status == None:
+        return ERROR_MSG
+
+    if not homework_status:
         verdict = 'К сожалению в работе нашлись ошибки.'
     else:
         verdict = 'Ревьюеру всё понравилось, можно приступать к следующему уроку.'
+
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homework_statuses(current_timestamp):
 
+    if current_timestamp == None:
+        current_timestamp = 0
+
     headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     params = {'from_date': current_timestamp}
+    statuses_url = '{}/{}/'.format(API_URL, 'homework_statuses')
 
-    homework_statuses = requests.get(
-        'https://praktikum.yandex.ru/api/user_api/homework_statuses/', headers=headers, params=params)
+    try:
 
-    return homework_statuses.json()
+        homework_statuses = requests.get(
+            statuses_url, headers=headers, params=params)
+
+        homework_stauses_json_data = homework_statuses.json()
+
+    except Exception as e:
+        print(f'Бот упал с ошибкой: {e}')
+        homework_stauses_json_data = None
+
+    return homework_stauses_json_data
 
 
 def send_message(message):
-    proxy = telegram.utils.request.Request(
-        proxy_url='socks5://75.119.217.119:25727')
-    bot = telegram.Bot(token=TELEGRAM_TOKEN, request=proxy)
-    reuslt = bot.send_message(chat_id=CHAT_ID, text=message)
+    try:
+        reuslt = BOT.send_message(chat_id=CHAT_ID, text=message)
+    except telegram.error.TelegramError as telegram_error:
+        print(f'Ошибка отправки сообещния через Telegram: {telegram_error}')
+        result = None
+
     return reuslt
 
 
 def main():
-    current_timestamp = int(time.time())
+    current_timestamp = 0
 
     while True:
         try:
