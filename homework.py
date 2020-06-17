@@ -3,13 +3,14 @@ import requests
 import telegram
 import time
 from dotenv import load_dotenv
+from boto.s3.connection import S3Connection
 
 load_dotenv()
 
 
-PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+PRACTICUM_TOKEN = S3Connection(os.environ['PRACTICUM_TOKEN'])
+TELEGRAM_TOKEN = S3Connection(os.environ['TELEGRAM_TOKEN'])
+CHAT_ID = S3Connection(os.environ['TELEGRAM_CHAT_ID'])
 
 
 def parse_homework_status(homework):
