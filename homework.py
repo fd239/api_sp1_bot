@@ -30,18 +30,10 @@ BOT = telegram.Bot(token=TELEGRAM_TOKEN, request=PROXY)
 def parse_homework_status(homework):
 
     homework_name = homework.get('homework_name')
-
-    if homework_name == None:
-        return ERROR_MSG
-
     homework_status_response = homework.get('status')
+    homework_status = HOMEWORK_STATUSES.get(homework_status_response)
 
-    if homework_status_response == None:
-        return ERROR_MSG
-
-    homework_status = HOMEWORK_STATUSES[homework_status_response]
-
-    if homework_status == None:
+    if homework_status is None or homework_name is None:
         return ERROR_MSG
 
     if not homework_status:
@@ -55,7 +47,7 @@ def parse_homework_status(homework):
 def get_homework_statuses(current_timestamp):
 
     if current_timestamp == None:
-        current_timestamp = 0
+        current_timestamp = int(time.time())
 
     headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     params = {'from_date': current_timestamp}
@@ -66,11 +58,14 @@ def get_homework_statuses(current_timestamp):
         homework_statuses = requests.get(
             statuses_url, headers=headers, params=params)
 
-        homework_stauses_json_data = homework_statuses.json()
-
-    except Exception as e:
+    except requests.RequestException as e:
         print(f'Бот упал с ошибкой: {e}')
-        homework_stauses_json_data = None
+
+    try:
+        homework_stauses_json_data = homework_statuses.json()
+    except ValueError as e:
+        print(f'Ошибка парсинга JSON: {e}')
+        homework_stauses_json_data = {}
 
     return homework_stauses_json_data
 
@@ -78,12 +73,12 @@ def get_homework_statuses(current_timestamp):
 def send_message(message):
 
     try:
-        reuslt = BOT.send_message(chat_id=CHAT_ID, text=message)
+        result = BOT.send_message(chat_id=CHAT_ID, text=message)
     except telegram.error.TelegramError as telegram_error:
         print(f'Ошибка отправки сообещния через Telegram: {telegram_error}')
         result = None
 
-    return reuslt
+    return result
 
 
 def main():
