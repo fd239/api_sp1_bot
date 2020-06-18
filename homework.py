@@ -98,7 +98,7 @@ def main():
                     new_homework.get('homeworks')[0]))
             current_timestamp = new_homework.get(
                 'current_date')
-            time.sleep(600)
+            time.sleep(300)
 
         except Exception as e:
             print(f'Бот упал с ошибкой: {e}')
