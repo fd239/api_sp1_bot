@@ -29,9 +29,6 @@ Project covered with Pytest tests
 ```
 pytest
 ```
-
-### And coding style tests
-
 It's learning project so test are aimed at checking the fulfillment of a test task
 
 ```
